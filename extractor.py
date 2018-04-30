@@ -47,6 +47,8 @@ def download_all_papers_iclr(base_url, save_dir, driver_path):
     for index, paper in enumerate(divs):
         name = paper.find_element_by_class_name('maincardBody').text
         print(len(name))
+        if(len(paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF'))==0):
+            continue
         link = paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF')[0].get_attribute('href')
         print(link.replace("forum","pdf"))
         print('Downloading paper {}/{}: {}'.format(index+1, num_papers, name))
@@ -74,6 +76,8 @@ def download_all_papers_nips(base_url, save_dir, driver_path):
         name = name.replace("(","")
         name = name.replace(")","")
         print(len(name))
+        if(len(paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF'))==0):
+            continue
         link = paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF')[0].get_attribute('href')
         driver2.get(link)
         link = driver2.current_url+'.pdf'
@@ -102,16 +106,23 @@ def download_all_papers_icml(base_url, save_dir, driver_path):
         name = name.replace("(","")
         name = name.replace(")","")
         print(len(name))
+        if(len(paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF'))==0):
+            continue
         link = paper.find_elements_by_css_selector('.btn.btn-default.btn-xs.href_PDF')[0].get_attribute('href')
         # print(link.replace("forum","pdf"))
         linklist = link.split("/")
-        link.replace(".html",linklist[-1].replace("html","pdf"))
+        link=link.replace(".html","/"+linklist[-1].replace("html","pdf"))
+        print(link)
         print('Downloading paper {}/{}: {}'.format(index+1, num_papers, name))
-        download_pdf(link.replace("forum","pdf"), os.path.join(save_dir, name))
+        download_file(link, os.path.join(save_dir, name))
     driver.close()
 
 
-
+def download_file(url, name):
+    r = requests.get(url, stream=True)
+    with open('%s.pdf' % name, 'wb') as f:
+        f.write(r.content)
+    r.close()
 
 def download_pdf(url, name):
     r = requests.get(url, stream=True)
